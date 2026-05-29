@@ -15,10 +15,12 @@ unifi_network_application_mongo_dbname: unifi
 unifi_network_application_mongo_user: unifi
 # unifi_network_application_mongo_password: ''
 # unifi_network_application_mongo_root_password: ''
+unifi_network_application_mongo_root_username: root
 
 unifi_network_application_timezone: Etc/UTC
 
 unifi_network_application_app_memlimit: 1024
+unifi_network_application_app_memstartup: 1024
 
 # Always pull the UniFi Network application and MongoDB images.
 # This can be useful to ensure you're always up to date if the images aren't pinned to a specific version (e.g. `latest`).
@@ -68,9 +70,24 @@ unifi_network_application_mobile_speedtest_port: 6789
 unifi_network_application_remote_syslog_expose: false
 unifi_network_application_remote_syslog_port: 5514
 
+# Optional: Expose MongoDB port to the host.
+unifi_network_application_db_expose: false
+unifi_network_application_db_port: 27017
+
+# Optional: Deploy mongo-express web UI for browsing the MongoDB database.
+unifi_network_application_mongo_express_enable: false
+unifi_network_application_mongo_express_version: latest
+unifi_network_application_mongo_express_port: 8081
+
 # Optional extra environment variables to set in the UniFi Network application and MongoDB containers.
 unifi_network_application_app_extra_env: {}
 unifi_network_application_db_extra_env: {}
+unifi_network_application_mongo_express_extra_env: {}
 
 # Optional ulimits to set for the MongoDB container. A ulimit is specified as 'nofile:262144:262144'.
 unifi_network_application_db_ulimits: []
+
+# Container log driver and rotation settings (applied to all containers).
+unifi_network_application_log_driver: json-file
+unifi_network_application_log_max_size: 10m
+unifi_network_application_log_max_files: "3"

@@ -55,6 +55,11 @@ argument_specs:
         required: true
         description: MongoDB password for the UniFi Network application.
 
+      unifi_network_application_mongo_root_username:
+        type: str
+        default: root
+        description: MongoDB root username.
+
       unifi_network_application_mongo_root_password:
         type: str
         required: true
@@ -71,6 +76,11 @@ argument_specs:
         type: int
         default: 1024
         description: Memory limit (in MB) for the UniFi Network application container.
+
+      unifi_network_application_app_memstartup:
+        type: int
+        default: 1024
+        description: Memory (in MB) allocated to the JVM at startup for the UniFi Network application container.
 
       unifi_network_application_deployment_always_pull:
         type: bool
@@ -195,6 +205,46 @@ argument_specs:
         default: 5514
         description: Remote syslog port.
 
+      unifi_network_application_log_driver:
+        type: str
+        default: json-file
+        description: Docker log driver for all containers.
+
+      unifi_network_application_log_max_size:
+        type: str
+        default: 10m
+        description: Maximum log file size before rotation (e.g. '10m', '100m').
+
+      unifi_network_application_log_max_files:
+        type: str
+        default: "3"
+        description: Maximum number of rotated log files to retain.
+
+      unifi_network_application_db_expose:
+        type: bool
+        default: false
+        description: Expose MongoDB port to the host.
+
+      unifi_network_application_db_port:
+        type: int
+        default: 27017
+        description: Host port to map to MongoDB's 27017 when db_expose is true.
+
+      unifi_network_application_mongo_express_enable:
+        type: bool
+        default: false
+        description: Deploy a mongo-express container for browsing the MongoDB database.
+
+      unifi_network_application_mongo_express_version:
+        type: str
+        default: latest
+        description: Docker image version for mongo-express.
+
+      unifi_network_application_mongo_express_port:
+        type: int
+        default: 8081
+        description: Host port for the mongo-express web UI.
+
       unifi_network_application_app_extra_env:
         type: dict
         default: {}
@@ -204,6 +254,11 @@ argument_specs:
         type: dict
         default: {}
         description: Optional extra environment variables to set in the MongoDB container.
+
+      unifi_network_application_mongo_express_extra_env:
+        type: dict
+        default: {}
+        description: Optional extra environment variables to set in the mongo-express container.
 
       unifi_network_application_db_ulimits:
         type: list

@@ -41,7 +41,11 @@
 
 - name: Deploy containers # noqa args[module]
   community.docker.docker_container: "{{ item }}"
-  loop: "{{ unifi_network_application_containers }}"
+  loop: >-
+    {{
+      unifi_network_application_containers +
+      (unifi_network_application_mongo_express_container if unifi_network_application_mongo_express_enable else [])
+    }}
   loop_control:
     label: "{{ item.name }}"
   notify: Prune Docker images

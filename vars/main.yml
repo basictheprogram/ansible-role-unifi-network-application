@@ -11,18 +11,35 @@ unifi_network_application_app_env_base:
   PGID: "{{ unifi_gid }}"
   TZ: "{{ unifi_network_application_timezone }}"
   MEM_LIMIT: "{{ unifi_network_application_app_memlimit | string }}"
+  MEM_STARTUP: "{{ unifi_network_application_app_memstartup | string }}"
   MONGO_HOST: unifi-mongo
   MONGO_PORT: '27017'
 
 unifi_network_application_db_env_base:
-  MONGO_INITDB_ROOT_USERNAME: root
+  MONGO_INITDB_ROOT_USERNAME: "{{ unifi_network_application_mongo_root_username }}"
   MONGO_INITDB_ROOT_PASSWORD: "{{ unifi_network_application_mongo_root_password }}"
+  MONGO_INITDB_DATABASE: "{{ unifi_network_application_mongo_dbname }}"
 
 unifi_network_application_env_shared:
   MONGO_AUTHSOURCE: admin
   MONGO_DBNAME: "{{ unifi_network_application_mongo_dbname }}"
   MONGO_USER: "{{ unifi_network_application_mongo_user }}"
   MONGO_PASS: "{{ unifi_network_application_mongo_password }}"
+
+unifi_network_application_mongo_express_env_base:
+  ME_CONFIG_MONGODB_SERVER: unifi-mongo
+  ME_CONFIG_MONGODB_PORT: '27017'
+  ME_CONFIG_MONGODB_ENABLE_ADMIN: 'true'
+  ME_CONFIG_MONGODB_ADMINUSERNAME: "{{ unifi_network_application_mongo_root_username }}"
+  ME_CONFIG_MONGODB_ADMINPASSWORD: "{{ unifi_network_application_mongo_root_password }}"
+  ME_CONFIG_BASICAUTH_USERNAME: "{{ unifi_network_application_mongo_user }}"
+  ME_CONFIG_BASICAUTH_PASSWORD: "{{ unifi_network_application_mongo_password }}"
+
+unifi_network_application_mongo_express_env: >-
+  {{
+    unifi_network_application_mongo_express_env_base |
+    combine(unifi_network_application_mongo_express_extra_env)
+  }}
 
 unifi_network_application_app_env: >-
   {{
@@ -53,9 +70,14 @@ unifi_network_application_app_ports: >-
 unifi_network_application_containers:
   - name: unifi-mongo
     image: mongo:{{ unifi_network_application_mongo_version }}
-    restart_policy: always
+    restart_policy: unless-stopped
     user: "{{ unifi_uid }}:{{ unifi_gid }}"
     ulimits: "{{ unifi_network_application_db_ulimits | default(omit) }}"
+    log_driver: "{{ unifi_network_application_log_driver }}"
+    log_options:
+      max-size: "{{ unifi_network_application_log_max_size }}"
+      max-file: "{{ unifi_network_application_log_max_files }}"
+    ports: "{{ [unifi_network_application_db_port ~ ':27017'] if unifi_network_application_db_expose else [] }}"
     healthcheck:
       test:
         - CMD-SHELL
@@ -74,7 +96,11 @@ unifi_network_application_containers:
 
   - name: unifi-network-application
     image: lscr.io/linuxserver/unifi-network-application:{{ unifi_network_application_app_version }}
-    restart_policy: always
+    restart_policy: unless-stopped
+    log_driver: "{{ unifi_network_application_log_driver }}"
+    log_options:
+      max-size: "{{ unifi_network_application_log_max_size }}"
+      max-file: "{{ unifi_network_application_log_max_files }}"
     healthcheck:
       test:
         - CMD-SHELL
@@ -91,3 +117,18 @@ unifi_network_application_containers:
     volumes: ['{{ unifi_network_application_app_path }}:/config']
     pull: "{{ unifi_network_application_deployment_always_pull }}"
     state: "{{ unifi_network_application_containers_state }}"
+
+unifi_network_application_mongo_express_container:
+  - name: mongo-express
+    image: mongo-express:{{ unifi_network_application_mongo_express_version }}
+    restart_policy: unless-stopped
+    log_driver: "{{ unifi_network_application_log_driver }}"
+    log_options:
+      max-size: "{{ unifi_network_application_log_max_size }}"
+      max-file: "{{ unifi_network_application_log_max_files }}"
+    ports:
+      - "{{ unifi_network_application_mongo_express_port }}:8081"
+    networks: [{name: "{{ unifi_network_application_docker_network }}"}]
+    env: "{{ unifi_network_application_mongo_express_env }}"
+    pull: "{{ unifi_network_application_deployment_always_pull }}"
+    state: started
