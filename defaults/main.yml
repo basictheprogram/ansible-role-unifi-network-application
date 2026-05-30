@@ -9,6 +9,12 @@ unifi_network_application_base_path: /opt/unifi
 #   UniFi 8.1+  → MongoDB 3.6–7.0
 #   UniFi 9.0+  → MongoDB 3.6–8.0
 #
+# ARM64 hardware constraint:
+#   MongoDB 5.0+ and 4.4 ≥ 4.4.19 require ARMv8.2-A (DOTPROD instruction).
+#   Raspberry Pi 4 (Cortex-A72, ARMv8.0-A) is limited to MongoDB ≤ 4.4.18.
+#   Raspberry Pi 5 (Cortex-A76, ARMv8.2-A) supports all MongoDB versions.
+#   See: https://jira.mongodb.org/browse/SERVER-55178
+#
 # Override in host_vars or group_vars to deploy a different version.
 unifi_network_application_app_version: "10.3.58"
 unifi_network_application_mongo_version: "8.0"

@@ -31,7 +31,9 @@ argument_specs:
           UniFi Network application version. UniFi 8.1+ supports MongoDB
           3.6–7.0; UniFi 9.0+ additionally supports MongoDB 8.0.
           Do not use 'latest' — MongoDB does not support automatic major
-          version upgrades.
+          version upgrades. ARM64 constraint: MongoDB 5.0+ and 4.4 >=
+          4.4.19 require ARMv8.2-A; Raspberry Pi 4 (ARMv8.0-A) is
+          limited to MongoDB <= 4.4.18.
 
       unifi_network_application_user:
         type: raw

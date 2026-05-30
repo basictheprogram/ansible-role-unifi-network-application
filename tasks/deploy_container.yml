@@ -1,0 +1,19 @@
+---
+
+- name: Deploy container {{ unifi_network_application_container.name }}
+  community.docker.docker_container:
+    name: "{{ unifi_network_application_container.name }}"
+    image: "{{ unifi_network_application_container.image }}"
+    restart_policy: "{{ unifi_network_application_container.restart_policy | default(omit) }}"
+    user: "{{ unifi_network_application_container.user | default(omit) }}"
+    ulimits: "{{ unifi_network_application_container.ulimits | default(omit) }}"
+    log_driver: "{{ unifi_network_application_container.log_driver | default(omit) }}"
+    log_options: "{{ unifi_network_application_container.log_options | default(omit) }}"
+    ports: "{{ unifi_network_application_container.ports | default(omit) }}"
+    healthcheck: "{{ unifi_network_application_container.healthcheck | default(omit) }}"
+    networks: "{{ unifi_network_application_container.networks | default(omit) }}"
+    env: "{{ unifi_network_application_container.env | default(omit) }}"
+    volumes: "{{ unifi_network_application_container.volumes | default(omit) }}"
+    pull: "{{ unifi_network_application_container.pull | default(omit) }}"
+    state: "{{ unifi_network_application_container.state | default(omit) }}"
+  notify: Prune Docker images

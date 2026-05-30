@@ -101,6 +101,17 @@ Docker image version for MongoDB. Must be compatible with the UniFi version in u
 > [!WARNING]
 > Do not use `latest` for MongoDB — it does not support automatic major version upgrades. Always pin to a major version (e.g. `8.0`).
 
+> [!IMPORTANT]
+> **ARM64 hardware constraint:** MongoDB 5.0+ and 4.4 ≥ 4.4.19 require ARMv8.2-A CPU instructions.
+> Raspberry Pi 4 (Cortex-A72, ARMv8.0-A) is hard-limited to **MongoDB ≤ 4.4.18** — any newer build
+> will crash with an illegal instruction error. Raspberry Pi 5 (Cortex-A76, ARMv8.2-A) supports all
+> MongoDB versions. See [SERVER-55178](https://jira.mongodb.org/browse/SERVER-55178).
+>
+> Pi 4 example — set in `host_vars/<hostname>.yml`:
+> ```yaml
+> unifi_network_application_mongo_version: "4.4.18"
+> ```
+
 ---
 
 ### Identity

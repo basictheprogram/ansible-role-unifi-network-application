@@ -2,6 +2,7 @@
 
 unifi_network_application_app_path: "{{ [unifi_network_application_base_path, 'app'] | path_join }}"
 unifi_network_application_db_path: "{{ [unifi_network_application_base_path, 'db'] | path_join }}"
+unifi_network_application_db_data_path: "{{ [unifi_network_application_base_path, 'db', 'data'] | path_join }}"
 
 unifi_network_application_containers_state: >-
   {{ 'healthy' if unifi_network_application_deployment_wait_for_health else 'started' }}
@@ -81,11 +82,11 @@ unifi_network_application_containers:
     healthcheck:
       test:
         - CMD-SHELL
-        - "mongosh --eval 'db.adminCommand(\"ping\")' | grep -q 'ok: 1'"
+        - "if which mongosh > /dev/null 2>&1; then mongosh --eval 'db.adminCommand(\"ping\")' | grep -q 'ok'; else mongo --eval 'db.adminCommand(\"ping\")' | grep -q 'ok'; fi"
       interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     networks: [{name: "{{ unifi_network_application_docker_network }}"}]
     env: "{{ unifi_network_application_db_env }}"
     volumes:

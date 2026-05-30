@@ -29,6 +29,7 @@
   loop:
     - "{{ unifi_network_application_app_path }}"
     - "{{ unifi_network_application_db_path }}"
+    - "{{ unifi_network_application_db_data_path }}"
 
 - name: Copy MongoDB init file
   ansible.builtin.copy:
@@ -43,13 +44,13 @@
     name: "{{ unifi_network_application_docker_network }}"
     state: present
 
-- name: Deploy containers # noqa args[module]
-  community.docker.docker_container: "{{ item }}"
+- name: Deploy containers
+  ansible.builtin.include_tasks: deploy_container.yml
   loop: >-
     {{
       unifi_network_application_containers +
       (unifi_network_application_mongo_express_container if unifi_network_application_mongo_express_enable else [])
     }}
   loop_control:
-    label: "{{ item.name }}"
-  notify: Prune Docker images
+    label: "{{ unifi_network_application_container.name }}"
+    loop_var: unifi_network_application_container
