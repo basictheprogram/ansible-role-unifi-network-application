@@ -15,7 +15,7 @@
 
 Deploy [UniFi Network application](https://github.com/linuxserver/docker-unifi-network-application) in Docker
 
-Install the role: `ansible-galaxy role install basictheprogram.unifi_network_application`
+Install the role: `ansible-galaxy role install realtime.unifi_network_application`
 
 See [Example Playbooks](#example-playbooks) below.
 
@@ -45,7 +45,7 @@ See [Example Playbooks](#example-playbooks) below.
 ## Role Variables
 
 > [!TIP]
-> Run `ansible-doc -t role basictheprogram.unifi_network_application` to see full role documentation.
+> Run `ansible-doc -t role realtime.unifi_network_application` to see full role documentation.
 
 ### Required
 
@@ -363,7 +363,7 @@ Optional ulimits for the MongoDB container. Format: `nofile:262144:262144`.
 - name: Deploy UniFi Network Application
   hosts: server
   roles:
-    - role: basictheprogram.unifi_network_application
+    - role: realtime.unifi_network_application
       vars:
         unifi_network_application_mongo_password: _!CHANGEME!_
         unifi_network_application_mongo_root_password: _!CHANGEME!_
@@ -376,7 +376,7 @@ Optional ulimits for the MongoDB container. Format: `nofile:262144:262144`.
 - name: Deploy UniFi Network Application
   hosts: server
   roles:
-    - role: basictheprogram.unifi_network_application
+    - role: realtime.unifi_network_application
       vars:
         unifi_network_application_app_version: "10.3.58"
         unifi_network_application_mongo_version: "8.0"
@@ -392,5 +392,5 @@ MIT
 
 [build_badge]:  https://img.shields.io/github/actions/workflow/status/basictheprogram/ansible-role-unifi-network-application/test.yml?branch=main&label=Lint%20%26%20Test
 [build_link]:   https://github.com/basictheprogram/ansible-role-unifi-network-application/actions?query=workflow:Test
-[galaxy_badge]: https://img.shields.io/ansible/role/d/basictheprogram/unifi_network_application
-[galaxy_link]:  https://galaxy.ansible.com/ui/standalone/roles/basictheprogram/unifi_network_application/
+[galaxy_badge]: https://img.shields.io/ansible/role/d/realtime/unifi_network_application
+[galaxy_link]:  https://galaxy.ansible.com/ui/standalone/roles/realtime/unifi_network_application/

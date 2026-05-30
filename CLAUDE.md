@@ -145,7 +145,7 @@ commit. Stop and verify between items.
 
 ### Consumer side notes
 
-* Install via Ansible Galaxy: `ansible-galaxy role install basictheprogram.unifi_network_application`
+* Install via Ansible Galaxy: `ansible-galaxy role install realtime.unifi_network_application`
 * Requires `community.docker` collection — see `requirements.yml`.
 * Requires Docker on the target host. Recommended: `geerlingguy.docker` role.
 * Two variables are **required** (no defaults): `unifi_network_application_mongo_password`
