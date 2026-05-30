@@ -2,8 +2,16 @@
 
 unifi_network_application_base_path: /opt/unifi
 
-unifi_network_application_app_version: latest
-unifi_network_application_mongo_version: 7.0
+# Pin versions explicitly. 'latest' is intentionally avoided for both images
+# because MongoDB does not support automatic upgrades between major versions.
+#
+# MongoDB compatibility matrix (linuxserver docs):
+#   UniFi 8.1+  → MongoDB 3.6–7.0
+#   UniFi 9.0+  → MongoDB 3.6–8.0
+#
+# Override in host_vars or group_vars to deploy a different version.
+unifi_network_application_app_version: "10.3.58"
+unifi_network_application_mongo_version: "8.0"
 
 # Names or IDs of the user and group to run UniFi Network application and MongoDB containers as.
 unifi_network_application_user: 1000

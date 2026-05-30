@@ -17,13 +17,21 @@ argument_specs:
 
       unifi_network_application_app_version:
         type: str
-        default: latest
-        description: Docker image version for the UniFi Network application.
+        default: "10.3.58"
+        description: >-
+          Docker image version for the UniFi Network application.
+          Override in host_vars or group_vars to pin a different release.
+          Avoid 'latest' — use an explicit version tag.
 
       unifi_network_application_mongo_version:
         type: str
-        default: 7.0
-        description: Docker image version for MongoDB.
+        default: "8.0"
+        description: >-
+          Docker image version for MongoDB. Must be compatible with the
+          UniFi Network application version. UniFi 8.1+ supports MongoDB
+          3.6–7.0; UniFi 9.0+ additionally supports MongoDB 8.0.
+          Do not use 'latest' — MongoDB does not support automatic major
+          version upgrades.
 
       unifi_network_application_user:
         type: raw

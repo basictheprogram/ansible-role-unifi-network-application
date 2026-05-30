@@ -79,19 +79,27 @@ Base path for UniFi Network application data on the host.
 
 #### `unifi_network_application_app_version`
 
-| Type   | Default  |
-|--------|----------|
-| string | `latest` |
+| Type   | Default    |
+|--------|------------|
+| string | `10.3.58`  |
 
-Docker image version for the UniFi Network application.
+Docker image version for the UniFi Network application. Override in `host_vars` or `group_vars` to pin a different release. Avoid `latest` — use an explicit version tag.
 
 #### `unifi_network_application_mongo_version`
 
 | Type   | Default |
 |--------|---------|
-| string | `7.0`   |
+| string | `8.0`   |
 
-Docker image version for MongoDB.
+Docker image version for MongoDB. Must be compatible with the UniFi version in use:
+
+| UniFi version | Supported MongoDB |
+|---------------|-------------------|
+| 8.1+          | 3.6 – 7.0         |
+| 9.0+          | 3.6 – 8.0         |
+
+> [!WARNING]
+> Do not use `latest` for MongoDB — it does not support automatic major version upgrades. Always pin to a major version (e.g. `8.0`).
 
 ---
 
@@ -370,8 +378,8 @@ Optional ulimits for the MongoDB container. Format: `nofile:262144:262144`.
   roles:
     - role: basictheprogram.unifi_network_application
       vars:
-        unifi_network_application_app_version: "9.5.21"
-        unifi_network_application_mongo_version: "7.0"
+        unifi_network_application_app_version: "10.3.58"
+        unifi_network_application_mongo_version: "8.0"
         unifi_network_application_mongo_password: _!CHANGEME!_
         unifi_network_application_mongo_root_password: _!CHANGEME!_
         unifi_network_application_timezone: America/Chicago
