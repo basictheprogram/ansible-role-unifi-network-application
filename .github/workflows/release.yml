@@ -1,19 +1,17 @@
 ---
 name: Release
-on:
+"on":
   push:
     tags:
-      - '*'
+      - "*"
   workflow_dispatch:
+
+# TODO: wire up Galaxy publishing for this fork.
+# The upstream workflow used tigattack/repo_utils with a 1Password service
+# account key (OP_SERVICE_ACCOUNT_KEY). Replace the release job below with
+# the publishing mechanism chosen for basictheprogram/ansible-role-unifi-network-application
+# before enabling releases from this fork.
 
 jobs:
   test:
     uses: ./.github/workflows/test.yml
-
-  release:
-    needs: [test]
-    uses: tigattack/repo_utils/.github/workflows/ansible-role-publish.yml@main
-    with:
-      role_name: ${{ needs.test.outputs.role_name }}
-    secrets:
-      op_service_account_key: ${{ secrets.OP_SERVICE_ACCOUNT_KEY }}

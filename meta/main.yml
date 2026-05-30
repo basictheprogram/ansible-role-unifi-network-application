@@ -1,16 +1,43 @@
 ---
+# This role is a fork of https://github.com/tigattack/ansible-role-unifi-network-application
+# by tigattack. Full credit to tigattack for the original design and implementation.
+# Issues should be opened against this fork. If a fix applies upstream, a PR will be
+# submitted to tigattack's repository.
+dependencies: []
+
 galaxy_info:
-  author: tigattack
-  namespace: tigattack
+  author: "Bob Tanner"
+  namespace: realtime
   role_name: unifi_network_application
-  description: Deploy UniFi Network application in Docker.
+  description: >
+    Deploy UniFi Network application and MongoDB in Docker.
+    Uses the linuxserver/unifi-network-application image alongside a
+    MongoDB container. Manages Docker network creation, host directory
+    layout, MongoDB init script, container lifecycle, log rotation, and
+    optional mongo-express web UI. Targets any Linux host with Docker
+    installed.
   license: MIT
-  company: none
-  min_ansible_version: "2.11"
+  company: Real Time Enterprises, Inc.
+  issue_tracker_url: https://github.com/basictheprogram/ansible-role-unifi-network-application/issues
+  min_ansible_version: "2.20"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+        - trixie
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+        - resolute
   galaxy_tags:
-    - system
-    - server
+    - docker
+    - mongodb
+    - mongo
+    - network
     - ubiquiti
     - unifi
     - controller
-dependencies: []
+    - server
+    - debian
+    - ubuntu

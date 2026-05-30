@@ -1,0 +1,28 @@
+---
+
+- name: Assert minimum Ansible version
+  ansible.builtin.assert:
+    that: ansible_version.full is version('2.20', '>=')
+    fail_msg: >-
+      unifi_network_application requires Ansible >= 2.20.
+      Found {{ ansible_version.full }}.
+    quiet: true
+
+- name: Assert supported architecture
+  ansible.builtin.assert:
+    that: ansible_architecture in ['x86_64', 'aarch64']
+    fail_msg: >-
+      unifi_network_application supports amd64 (x86_64) and arm64 (aarch64) only.
+      Found {{ ansible_architecture }}.
+    quiet: true
+
+- name: Assert required secrets are defined
+  ansible.builtin.assert:
+    that:
+      - unifi_network_application_mongo_password | default('') | length > 0
+      - unifi_network_application_mongo_root_password | default('') | length > 0
+    fail_msg: >-
+      unifi_network_application_mongo_password and
+      unifi_network_application_mongo_root_password must both be set
+      and non-empty.
+    quiet: true

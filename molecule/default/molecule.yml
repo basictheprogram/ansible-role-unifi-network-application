@@ -9,16 +9,57 @@ driver:
   name: docker
 
 platforms:
-  - name: instance
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-debian13}-ansible:latest"
-    command: ${MOLECULE_DOCKER_COMMAND:-""}
+  - name: debian-bookworm
+    image: "geerlingguy/docker-debian12-ansible:latest"
+    command: ""
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
-      # Mount Docker storage to a volume to facilitate use of overlay2 driver
       - /var/lib/docker
     cgroupns_mode: host
     privileged: true
     pre_build_image: true
+
+  - name: debian-trixie
+    image: "geerlingguy/docker-debian13-ansible:latest"
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /var/lib/docker
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+
+  - name: ubuntu-jammy
+    image: "geerlingguy/docker-ubuntu2204-ansible:latest"
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /var/lib/docker
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+
+  - name: ubuntu-noble
+    image: "geerlingguy/docker-ubuntu2404-ansible:latest"
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /var/lib/docker
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+
+  # geerlingguy/docker-ubuntu2604-ansible may not yet be published;
+  # verify availability before enabling this platform.
+  # - name: ubuntu-resolute
+  #   image: "geerlingguy/docker-ubuntu2604-ansible:latest"
+  #   command: ""
+  #   volumes:
+  #     - /sys/fs/cgroup:/sys/fs/cgroup:rw
+  #     - /var/lib/docker
+  #   cgroupns_mode: host
+  #   privileged: true
+  #   pre_build_image: true
 
 ansible:
   cfg:
@@ -31,11 +72,17 @@ provisioner:
   inventory:
     group_vars:
       all:
-        project_dir: ${MOLECULE_PROJECT_DIRECTORY}
-        unifi_network_application_mongo_password: _!CHANGEME!_
-        unifi_network_application_mongo_root_password: _!CHANGEME!_
+        unifi_network_application_mongo_password: MoleculeTestMongo1!
+        unifi_network_application_mongo_root_password: MoleculeTestRoot1!
         unifi_network_application_user: "{{ ansible_facts.user_uid }}"
         unifi_network_application_group: "{{ ansible_facts.user_gid }}"
+
+verifier:
+  name: testinfra
+  directory: tests/
+  options:
+    v: true
+    p: "no:cacheprovider"
 
 scenario:
   test_sequence:

@@ -3,24 +3,73 @@
 [![Build Status][build_badge]][build_link]
 [![Ansible Galaxy][galaxy_badge]][galaxy_link]
 
+> **Fork notice:** This role is a fork of
+> [tigattack/ansible-role-unifi-network-application](https://github.com/tigattack/ansible-role-unifi-network-application)
+> by [tigattack](https://github.com/tigattack). Full credit to tigattack for the
+> original design and implementation. This fork is maintained independently at
+> [basictheprogram/ansible-role-unifi-network-application](https://github.com/basictheprogram/ansible-role-unifi-network-application).
+>
+> **Issues:** Please open issues against this fork. If the fix applies to the
+> upstream role as well, a pull request will be submitted to
+> [tigattack's repository](https://github.com/tigattack/ansible-role-unifi-network-application).
+
 Deploy [UniFi Network application](https://github.com/linuxserver/docker-unifi-network-application) in Docker
 
-Install the role: `ansible-galaxy role install tigattack.unifi_network_application`
+Install the role: `ansible-galaxy role install basictheprogram.unifi_network_application`
 
 See [Example Playbooks](#example-playbooks) below.
 
-## Prerequisites
+## Requirements
 
-* Docker. I recommend the [geerlingguy.docker](https://github.com/geerlingguy/ansible-role-docker) role.
-* [community.docker](https://galaxy.ansible.com/ui/repo/published/community/docker/) Ansible collection. See [requirements.yml](requirements.yml).
-* A chosen data path on the host.
+* Ansible core >= 2.20
+* Docker on the target host. Recommended: [geerlingguy.docker](https://github.com/geerlingguy/ansible-role-docker)
+* [community.docker](https://galaxy.ansible.com/ui/repo/published/community/docker/) Ansible collection — see [requirements.yml](requirements.yml)
+* A chosen data path on the host
+
+## Supported Platforms
+
+| OS     | Versions                       |
+|--------|--------------------------------|
+| Debian | bookworm (12), trixie (13)     |
+| Ubuntu | jammy (22.04), noble (24.04), resolute (26.04) |
+
+## Task Flow
+
+1. **Preflight** — asserts Ansible >= 2.20, supported architecture (amd64/arm64), and that both required secrets are set
+2. **User/group lookup** — resolves UID/GID for the configured user and group
+3. **Directory creation** — ensures `base_path/app` and `base_path/db` exist with correct ownership
+4. **MongoDB init script** — copies `mongo-init.sh` to the DB data path
+5. **Docker network** — creates the Docker network if absent
+6. **Container deploy** — starts `unifi-mongo`, `unifi-network-application`, and optionally `mongo-express`
 
 ## Role Variables
 
 > [!TIP]
-> Once installed, you can run `ansible-doc -t role tigattack.unifi_network_application` to see role documentation.
+> Run `ansible-doc -t role basictheprogram.unifi_network_application` to see full role documentation.
 
-### `unifi_network_application_base_path`
+### Required
+
+#### `unifi_network_application_mongo_password`
+
+| Type   | Default |
+|--------|---------|
+| string | —       |
+
+MongoDB password for the UniFi Network application user. **Required.**
+
+#### `unifi_network_application_mongo_root_password`
+
+| Type   | Default |
+|--------|---------|
+| string | —       |
+
+MongoDB root password. **Required.**
+
+---
+
+### Paths and versions
+
+#### `unifi_network_application_base_path`
 
 | Type | Default      |
 |------|--------------|
@@ -28,7 +77,7 @@ See [Example Playbooks](#example-playbooks) below.
 
 Base path for UniFi Network application data on the host.
 
-### `unifi_network_application_app_version`
+#### `unifi_network_application_app_version`
 
 | Type   | Default  |
 |--------|----------|
@@ -36,39 +85,39 @@ Base path for UniFi Network application data on the host.
 
 Docker image version for the UniFi Network application.
 
-### `unifi_network_application_mongo_version`
+#### `unifi_network_application_mongo_version`
 
 | Type   | Default |
 |--------|---------|
-| string | 7.0     |
+| string | `7.0`   |
 
 Docker image version for MongoDB.
 
-### `unifi_network_application_user`
+---
+
+### Identity
+
+#### `unifi_network_application_user`
 
 | Type | Default |
 |------|---------|
 | raw  | `1000`  |
 
-User ID to run the containers as.
+User name or ID to run the containers as.
 
-### `unifi_network_application_group`
+#### `unifi_network_application_group`
 
 | Type | Default |
 |------|---------|
 | raw  | `1000`  |
 
-Group ID to run the containers as.
+Group name or ID to run the containers as.
 
-### `unifi_network_application_docker_network`
+---
 
-| Type   | Default |
-|--------|---------|
-| string | `unifi` |
+### MongoDB
 
-Name of the Docker network to connect the containers to.
-
-### `unifi_network_application_mongo_dbname`
+#### `unifi_network_application_mongo_dbname`
 
 | Type   | Default |
 |--------|---------|
@@ -76,7 +125,7 @@ Name of the Docker network to connect the containers to.
 
 MongoDB database name for UniFi Network application.
 
-### `unifi_network_application_mongo_user`
+#### `unifi_network_application_mongo_user`
 
 | Type   | Default |
 |--------|---------|
@@ -84,59 +133,75 @@ MongoDB database name for UniFi Network application.
 
 MongoDB username for UniFi Network application.
 
-### `unifi_network_application_mongo_password`
+#### `unifi_network_application_mongo_root_username`
 
 | Type   | Default |
 |--------|---------|
-| string | None    |
+| string | `root`  |
 
-MongoDB password for the UniFi Network application.
+MongoDB root username.
 
-### `unifi_network_application_mongo_root_password`
+---
+
+### Network and Docker
+
+#### `unifi_network_application_docker_network`
 
 | Type   | Default |
 |--------|---------|
-| string | None    |
+| string | `unifi` |
 
-MongoDB root password for the UniFi Network application.
+Name of the Docker network to connect the containers to.
 
-### `unifi_network_application_timezone`
+#### `unifi_network_application_timezone`
 
 | Type   | Default   |
 |--------|-----------|
 | string | `Etc/UTC` |
 
-Timezone for the UniFi Network application.
+Timezone for the UniFi Network application. See [tz database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
 
-See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List.
+---
 
-### `unifi_network_application_app_memlimit`
+### Application tuning
+
+#### `unifi_network_application_app_memlimit`
 
 | Type | Default |
 |------|---------|
 | int  | `1024`  |
 
-Memory limit (in MB) for the UniFi Network application container.
+Memory limit in MB for the UniFi Network application container.
 
-### `unifi_network_application_deployment_always_pull`
+#### `unifi_network_application_app_memstartup`
+
+| Type | Default |
+|------|---------|
+| int  | `1024`  |
+
+JVM startup memory in MB for the UniFi Network application container.
+
+---
+
+### Deployment behaviour
+
+#### `unifi_network_application_deployment_always_pull`
 
 | Type | Default |
 |------|---------|
 | bool | `false` |
 
-Always pull the UniFi Network application and MongoDB images.
+Always pull images before deploying. Useful when using `latest` or mutable tags.
 
-This can be useful to ensure you're always up to date if the images aren't pinned to a specific version (e.g. `latest`).
-
-### `unifi_network_application_deployment_wait_for_health`
+#### `unifi_network_application_deployment_wait_for_health`
 
 | Type | Default |
 |------|---------|
 | bool | `true`  |
 
-Wait for the MongoDB and UniFi Network application containers to be healthy before continuing.
+Wait for containers to report healthy before continuing.
 
-### `unifi_network_application_prune_images`
+#### `unifi_network_application_prune_images`
 
 | Type | Default |
 |------|---------|
@@ -145,210 +210,179 @@ Wait for the MongoDB and UniFi Network application containers to be healthy befo
 Prune unused Docker images after deployment.
 
 > [!WARNING]
-> This role cannot filter pruned images, so ALL unused images will be removed.
+> This role cannot filter pruned images — ALL unused images will be removed.
 
-### `unifi_network_application_device_communication_expose`
+---
 
-| Type | Default |
-|------|---------|
-| bool | `true`  |
+### Logging
 
-Expose device communication port.
+#### `unifi_network_application_log_driver`
 
-Required for device communication.
+| Type   | Default     |
+|--------|-------------|
+| string | `json-file` |
 
-### `unifi_network_application_device_communication_port`
+Docker log driver for all containers.
 
-| Type | Default |
-|------|---------|
-| int  | `8080`  |
+#### `unifi_network_application_log_max_size`
 
-Device communication port.
+| Type   | Default |
+|--------|---------|
+| string | `10m`   |
 
-### `unifi_network_application_web_admin_expose`
+Maximum log file size before rotation.
 
-| Type | Default |
-|------|---------|
-| bool | `true`  |
+#### `unifi_network_application_log_max_files`
 
-Expose web admin port.
+| Type   | Default |
+|--------|---------|
+| string | `3`     |
 
-### `unifi_network_application_web_admin_port`
+Number of rotated log files to retain.
 
-| Type | Default |
-|------|---------|
-| int  | `8443`  |
+---
 
-Web admin port.
+### Port exposure — UniFi application
 
-### `unifi_network_application_stun_expose`
+All ports default to the standard UniFi port numbers. Set the `_expose` variable to `false` to suppress a port binding entirely.
 
-| Type | Default |
-|------|---------|
-| bool | `true`  |
+| Variable | Default expose | Default port | Notes |
+|----------|---------------|--------------|-------|
+| `unifi_network_application_device_communication_expose` / `_port` | `true` | `8080` | Required for device communication |
+| `unifi_network_application_web_admin_expose` / `_port` | `true` | `8443` | Web admin UI |
+| `unifi_network_application_stun_expose` / `_port` | `true` | `3478` (UDP) | STUN |
+| `unifi_network_application_device_discovery_expose` / `_port` | `true` | `10001` (UDP) | Device discovery |
+| `unifi_network_application_l2_discovery_expose` / `_port` | `false` | `1900` (UDP) | L2 network discovery |
+| `unifi_network_application_guest_portal_redirect_http_expose` / `_port` | `false` | `8880` | Guest portal HTTP redirect |
+| `unifi_network_application_guest_portal_redirect_https_expose` / `_port` | `false` | `8843` | Guest portal HTTPS redirect |
+| `unifi_network_application_mobile_speedtest_expose` / `_port` | `false` | `6789` | Mobile throughput test |
+| `unifi_network_application_remote_syslog_expose` / `_port` | `false` | `5514` (UDP) | Remote syslog |
 
-Expose STUN port.
+### Port exposure — MongoDB
 
-### `unifi_network_application_stun_port`
-
-| Type | Default |
-|------|---------|
-| int  | `3478`  |
-
-STUN port.
-
-### `unifi_network_application_device_discovery_expose`
-
-| Type | Default |
-|------|---------|
-| bool | `true`  |
-
-Expose device discovery port.
-
-Required for UniFi device discovery.
-
-### `unifi_network_application_device_discovery_port`
-
-| Type | Default |
-|------|---------|
-| int  | `10001` |
-
-Device discovery port.
-
-### `unifi_network_application_l2_discovery_expose`
+#### `unifi_network_application_db_expose`
 
 | Type | Default |
 |------|---------|
 | bool | `false` |
 
-Expose L2 discovery port.
+Expose MongoDB to the host (for external tools or mongo-express running outside the container network).
 
-Optional, but required for 'Make controller discoverable on L2 network' option.
-
-### `unifi_network_application_l2_discovery_port`
+#### `unifi_network_application_db_port`
 
 | Type | Default |
 |------|---------|
-| int  | `1900`  |
+| int  | `27017` |
 
-L2 discovery port.
+Host port mapped to MongoDB's 27017 when `db_expose` is true.
 
-### `unifi_network_application_guest_portal_redirect_http_expose`
+---
 
-| Type | Default |
-|------|---------|
-| bool | `false` |
+### Optional: mongo-express
 
-Expose HTTP guest portal redirect port.
-
-Optional, but required for UniFi guest portal HTTP redirection.
-
-### `unifi_network_application_guest_portal_redirect_http_port`
-
-| Type | Default |
-|------|---------|
-| int  | `8880`  |
-
-HTTP guest portal redirect port.
-
-### `unifi_network_application_guest_portal_redirect_https_expose`
+#### `unifi_network_application_mongo_express_enable`
 
 | Type | Default |
 |------|---------|
 | bool | `false` |
 
-Expose HTTPS guest portal redirect port.
+Deploy a [mongo-express](https://github.com/mongo-express/mongo-express) container for browsing the MongoDB database.
 
-Optional, but required for UniFi guest portal HTTPS redirection.
+#### `unifi_network_application_mongo_express_version`
 
-### `unifi_network_application_guest_portal_redirect_https_port`
+| Type   | Default  |
+|--------|----------|
+| string | `latest` |
 
-| Type | Default |
-|------|---------|
-| int  | `8843`  |
+Docker image version for mongo-express.
 
-HTTPS guest portal redirect port.
-
-### `unifi_network_application_mobile_speedtest_expose`
+#### `unifi_network_application_mongo_express_port`
 
 | Type | Default |
 |------|---------|
-| bool | `false` |
+| int  | `8081`  |
 
-Expose mobile throughput test port.
+Host port for the mongo-express web UI.
 
-Optional, but required for UniFi mobile throughput test.
-
-### `unifi_network_application_mobile_speedtest_port`
-
-| Type | Default |
-|------|---------|
-| int  | `6789`  |
-
-Mobile throughput test port.
-
-### `unifi_network_application_remote_syslog_expose`
-
-| Type | Default |
-|------|---------|
-| bool | `false` |
-
-Expose remote syslog port.
-
-Optional, but required if you wish to use remote syslog.
-
-### `unifi_network_application_remote_syslog_port`
-
-| Type | Default |
-|------|---------|
-| int  | `5514`  |
-
-Remote syslog port.
-
-### `unifi_network_application_app_extra_env`
+#### `unifi_network_application_mongo_express_extra_env`
 
 | Type  | Default |
 |-------|---------|
 | dict  | `{}`    |
 
-Optional extra environment variables to set in the UniFi Network application container.
+Extra environment variables for the mongo-express container.
 
-### `unifi_network_application_db_extra_env`
+---
+
+### Extra environment variables
+
+#### `unifi_network_application_app_extra_env`
 
 | Type  | Default |
 |-------|---------|
 | dict  | `{}`    |
 
-Optional extra environment variables to set in the MongoDB container.
+Extra environment variables for the UniFi Network application container.
 
-### `unifi_network_application_db_ulimits`
+#### `unifi_network_application_db_extra_env`
+
+| Type  | Default |
+|-------|---------|
+| dict  | `{}`    |
+
+Extra environment variables for the MongoDB container.
+
+---
+
+### MongoDB ulimits
+
+#### `unifi_network_application_db_ulimits`
 
 | Type      | Default |
 |-----------|---------|
-| list[str] | `{}`    |
+| list[str] | `[]`    |
 
-Optional list of ulimits to set for the MongoDB container. A ulimit is specified as `nofile:262144:262144`.
+Optional ulimits for the MongoDB container. Format: `nofile:262144:262144`.
+
+---
 
 ## Example Playbooks
 
-**Bare Minimum:**
+**Bare minimum:**
 
 ```yml
 ---
 - name: Deploy UniFi Network Application
   hosts: server
   roles:
-    - role: tigattack.unifi_network_application
+    - role: basictheprogram.unifi_network_application
       vars:
         unifi_network_application_mongo_password: _!CHANGEME!_
         unifi_network_application_mongo_root_password: _!CHANGEME!_
+```
+
+**With mongo-express and pinned versions:**
+
+```yml
+---
+- name: Deploy UniFi Network Application
+  hosts: server
+  roles:
+    - role: basictheprogram.unifi_network_application
+      vars:
+        unifi_network_application_app_version: "9.5.21"
+        unifi_network_application_mongo_version: "7.0"
+        unifi_network_application_mongo_password: _!CHANGEME!_
+        unifi_network_application_mongo_root_password: _!CHANGEME!_
+        unifi_network_application_timezone: America/Chicago
+        unifi_network_application_mongo_express_enable: true
 ```
 
 ## License
 
 MIT
 
-[build_badge]:  https://img.shields.io/github/actions/workflow/status/tigattack/ansible-role-unifi-network-application/test.yml?branch=main&label=Lint%20%26%20Test
-[build_link]:   https://github.com/tigattack/ansible-role-unifi-network-application/actions?query=workflow:Test
-[galaxy_badge]: https://img.shields.io/ansible/role/d/tigattack/unifi_network_application
-[galaxy_link]:  https://galaxy.ansible.com/ui/standalone/roles/tigattack/unifi_network_application/
+[build_badge]:  https://img.shields.io/github/actions/workflow/status/basictheprogram/ansible-role-unifi-network-application/test.yml?branch=main&label=Lint%20%26%20Test
+[build_link]:   https://github.com/basictheprogram/ansible-role-unifi-network-application/actions?query=workflow:Test
+[galaxy_badge]: https://img.shields.io/ansible/role/d/basictheprogram/unifi_network_application
+[galaxy_link]:  https://galaxy.ansible.com/ui/standalone/roles/basictheprogram/unifi_network_application/

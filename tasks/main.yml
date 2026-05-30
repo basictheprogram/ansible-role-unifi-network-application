@@ -1,5 +1,9 @@
 ---
 
+- name: Run preflight assertions
+  ansible.builtin.include_tasks: preflight.yml
+  tags: unifi
+
 - name: Get user info
   ansible.builtin.getent:
     database: passwd
